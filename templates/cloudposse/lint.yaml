@@ -25,9 +25,9 @@ spec:
     - terraform modules
   variables: []
   specTemplate:
-    location: git
-    repo: {{ (ds "repository") }}
-    path: codefresh.yml
-    context: github
+    location: url
+#TODO: update when it will be merged to master and create a short link
+    url: >-
+      https://raw.githubusercontent.com/cloudposse/codefresh/initial-implementation/pipelines_codefresh.yml
   stages: []
   steps: {}
