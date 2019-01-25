@@ -1,0 +1,56 @@
+# Name of this project
+name: Codefresh pipelines
+
+# License of this project
+license: "APACHE2"
+
+# Copyrights
+copyrights:
+  - name: "Cloud Posse, LLC"
+    url: "https://cloudposse.com"
+    year: "2018"
+
+# Canonical GitHub repo 
+github_repo: cloudposse/codefresh-pipelines
+
+# Badges to display
+badges:
+  - name: "Build Status"
+    image: "https://travis-ci.org/cloudposse/build-harness.svg?branch=master"
+    url: "https://travis-ci.org/cloudposse/build-harness"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related:
+  - name: "build-harness"
+    description: "Collection of Makefiles to facilitate building Golang projects, Dockerfiles, Helm charts, and more"
+    url: "https://github.com/cloudposse/build-harness"
+  - name: "Packages"
+    description: "Cloud Posse installer and distribution of native apps"
+    url: "https://github.com/cloudposse/packages"
+
+# References
+#references:
+#TODO: add all terraform modules here
+#  - name: "Wikipedia - Test Harness"
+#    description: 'The `build-harness` is similar in concept to a "Test Harness"'
+#    url: "https://en.wikipedia.org/wiki/Test_harness"
+
+# Short description of this project
+description: |-
+  This `codefresh-pipelines` repo allows to create and update `Codefresh` pipelines for a collection of terraform modules and other repos.
+
+# How to use this project
+usage: |-
+  If you need to add new repo, just update `Makefile` adding new repo to `REPOSITORIES` variable. Make a PR and as soon as it will be closed, new `Codefresh` repository will be created with proper pipeline.
+  If you need to update pipelines, then feel free to update proper files in `templates` folder, make a PR and as soon as it will be closed all supported pipelines will be updated.
+
+# Contributors to this project
+contributors:
+  - name: "Erik Osterman"
+    github: "osterman"
+  - name: "Igor Rodionov"
+    github: "goruha"
+  - name: "Maxim Mironenko"
+    github: "maximmi"
