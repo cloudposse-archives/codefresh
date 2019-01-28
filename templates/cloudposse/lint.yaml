@@ -28,6 +28,6 @@ spec:
     location: url
 #TODO: update when it will be merged to master and create a short link
     url: >-
-      https://raw.githubusercontent.com/cloudposse/codefresh/initial-implementation/pipelines_codefresh.yml
+      https://raw.githubusercontent.com/cloudposse/codefresh/initial-implementation/pipelines/lint.yml
   stages: []
   steps: {}

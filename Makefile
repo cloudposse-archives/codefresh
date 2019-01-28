@@ -8,8 +8,7 @@ export BUILD_HARNESS_BRANCH ?= 0.15.3
 PROJECT ?= cloudposse-pipelines
 
 ## Repos to sync pipelines
-REPOSITORIES ?= cloudposse/terraform-aws-s3-bucket \
- 				cloudposse/terraform-aws-mq-broker
+REPOSITORIES ?= $(shell cat repositories.txt)
 
 ## Codefresh accounts to operate with
 ACCOUNTS ?= cloudposse
