@@ -8,7 +8,7 @@ license: "APACHE2"
 copyrights:
   - name: "Cloud Posse, LLC"
     url: "https://cloudposse.com"
-    year: "2018"
+    year: "2019"
 
 # Canonical GitHub repo 
 github_repo: cloudposse/codefresh-pipelines
@@ -16,8 +16,8 @@ github_repo: cloudposse/codefresh-pipelines
 # Badges to display
 badges:
   - name: "Build Status"
-    image: "https://travis-ci.org/cloudposse/build-harness.svg?branch=master"
-    url: "https://travis-ci.org/cloudposse/build-harness"
+    image: "https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fcodefresh%2Fcodefresh?type=cf-1"
+    url: "https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/codefresh/codefresh"
   - name: "Slack Community"
     image: "https://slack.cloudposse.com/badge.svg"
     url: "https://slack.cloudposse.com"
@@ -39,12 +39,12 @@ related:
 
 # Short description of this project
 description: |-
-  This `codefresh-pipelines` repo allows to create and update `Codefresh` pipelines for a collection of terraform modules and other repos.
+  This `codefresh` repo allows to create and update `Codefresh` pipelines for a collection of terraform modules and other repos.
 
 # How to use this project
 usage: |-
-  If you need to add new repo, just update `Makefile` adding new repo to `REPOSITORIES` variable. Make a PR and as soon as it will be closed, new `Codefresh` repository will be created with proper pipeline.
-  If you need to update pipelines, then feel free to update proper files in `templates` folder, make a PR and as soon as it will be closed all supported pipelines will be updated.
+  If you need to add new repo, just update `Makefile` adding new repo to `REPOSITORIES` variable. Open a PR and as soon as it's closed, a new `Codefresh` repository will be created with proper pipeline.
+  If you need to update pipelines, feel free to update the files in `templates` folder, open a PR and as soon as it's closed all supported pipelines will be updated.
 
 # Contributors to this project
 contributors:

@@ -3,10 +3,10 @@
 
 [![Cloud Posse][logo]](https://cpco.io/homepage)
 
-# Codefresh pipelines [![Build Status](https://travis-ci.org/cloudposse/build-harness.svg?branch=master)](https://travis-ci.org/cloudposse/build-harness) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+# Codefresh pipelines [![Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fcodefresh%2Fcodefresh?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/codefresh/codefresh) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 
 
-This `codefresh-pipelines` repo allows to create and update `Codefresh` pipelines for a collection of terraform modules and other repos.
+This `codefresh` repo allows to create and update `Codefresh` pipelines for a collection of terraform modules and other repos.
 
 
 ---
@@ -38,8 +38,8 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 ## Usage
 
-If you need to add new repo, just update `Makefile` adding new repo to `REPOSITORIES` variable. Make a PR and as soon as it will be closed, new `Codefresh` repository will be created with proper pipeline.
-If you need to update pipelines, then feel free to update proper files in `templates` folder, make a PR and as soon as it will be closed all supported pipelines will be updated.
+If you need to add new repo, just update `Makefile` adding new repo to `REPOSITORIES` variable. Open a PR and as soon as it's closed, a new `Codefresh` repository will be created with proper pipeline.
+If you need to update pipelines, feel free to update the files in `templates` folder, open a PR and as soon as it's closed all supported pipelines will be updated.
 
 
 
@@ -123,7 +123,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
 ## Copyrights
 
-Copyright © 2018-2019 [Cloud Posse, LLC](https://cloudposse.com)
+Copyright © 2019-2019 [Cloud Posse, LLC](https://cloudposse.com)
 
 
 
