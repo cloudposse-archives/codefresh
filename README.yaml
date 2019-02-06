@@ -18,6 +18,9 @@ badges:
   - name: "Build Status"
     image: "https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fcodefresh%2Fcodefresh?type=cf-1"
     url: "https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/codefresh/codefresh"
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/codefresh.svg"
+    url: "https://github.com/cloudposse/codefresh/releases"
   - name: "Slack Community"
     image: "https://slack.cloudposse.com/badge.svg"
     url: "https://slack.cloudposse.com"
@@ -29,13 +32,6 @@ related:
   - name: "Packages"
     description: "Cloud Posse installer and distribution of native apps"
     url: "https://github.com/cloudposse/packages"
-
-# References
-#references:
-#TODO: add all terraform modules here
-#  - name: "Wikipedia - Test Harness"
-#    description: 'The `build-harness` is similar in concept to a "Test Harness"'
-#    url: "https://en.wikipedia.org/wiki/Test_harness"
 
 # Short description of this project
 description: |-

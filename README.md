@@ -3,7 +3,7 @@
 
 [![Cloud Posse][logo]](https://cpco.io/homepage)
 
-# Codefresh pipelines [![Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fcodefresh%2Fcodefresh?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/codefresh/codefresh) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+# Codefresh pipelines [![Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fcodefresh%2Fcodefresh?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/codefresh/codefresh) [![Latest Release](https://img.shields.io/github/release/cloudposse/codefresh.svg)](https://github.com/cloudposse/codefresh/releases) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 
 
 This `codefresh` repo allows to create and update `Codefresh` pipelines for a collection of terraform modules and other repos.
