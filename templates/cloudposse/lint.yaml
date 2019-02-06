@@ -1,0 +1,32 @@
+version: "1.0"
+kind: "pipeline"
+metadata:
+  name: {{ (ds "repository") }}/lint
+  isPublic: true
+  labels:
+    tags: []
+  deprecate:
+    applicationPort: '8080'
+    repoPipeline: true
+  project: {{ (ds "repository") }}
+spec:
+  triggers:
+    - branchRegex: /.*/gi
+      branchRegexInput: regex
+      commentRegex: /.*/gi
+      context: github-webhooks
+      events:
+        - push
+      provider: github
+      pullRequestAllowForkEvents: false
+      repo: {{ (ds "repository") }}
+      type: git
+  contexts:
+    - terraform modules
+  variables: []
+  specTemplate:
+    location: url
+    url: >-
+      https://raw.githubusercontent.com/cloudposse/codefresh/master/codefresh/terraform.yml
+  stages: []
+  steps: {}

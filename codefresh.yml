@@ -1,0 +1,11 @@
+# Build a service with environment variables
+version: '1.0'
+
+steps:
+  apply_codefresh_sync:
+    title: Sync codefresh pipelines
+    image: cloudposse/build-harness:${{BUILD_HARNESS_VERSION}}
+    commands:
+      # Requires CF_API_KEY, here it will get it from Shared Configuration
+      - make codefresh/sync/auth/cloudposse
+      - make codefresh/sync/apply

@@ -1,0 +1,52 @@
+# Name of this project
+name: Codefresh pipelines
+
+# License of this project
+license: "APACHE2"
+
+# Copyrights
+copyrights:
+  - name: "Cloud Posse, LLC"
+    url: "https://cloudposse.com"
+    year: "2019"
+
+# Canonical GitHub repo 
+github_repo: cloudposse/codefresh-pipelines
+
+# Badges to display
+badges:
+  - name: "Build Status"
+    image: "https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fcodefresh%2Fcodefresh?type=cf-1"
+    url: "https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/codefresh/codefresh"
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/codefresh.svg"
+    url: "https://github.com/cloudposse/codefresh/releases"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related:
+  - name: "build-harness"
+    description: "Collection of Makefiles to facilitate building Golang projects, Dockerfiles, Helm charts, and more"
+    url: "https://github.com/cloudposse/build-harness"
+  - name: "Packages"
+    description: "Cloud Posse installer and distribution of native apps"
+    url: "https://github.com/cloudposse/packages"
+
+# Short description of this project
+description: |-
+  This `codefresh` repo allows to create and update `Codefresh` pipelines for a collection of terraform modules and other repos.
+
+# How to use this project
+usage: |-
+  If you need to add new repo, just update `Makefile` adding new repo to `REPOSITORIES` variable. Open a PR and as soon as it's closed, a new `Codefresh` repository will be created with proper pipeline.
+  If you need to update pipelines, feel free to update the files in `templates` folder, open a PR and as soon as it's closed all supported pipelines will be updated.
+
+# Contributors to this project
+contributors:
+  - name: "Erik Osterman"
+    github: "osterman"
+  - name: "Igor Rodionov"
+    github: "goruha"
+  - name: "Maxim Mironenko"
+    github: "maximmi"
