@@ -9,3 +9,5 @@ steps:
       # Requires CF_API_KEY, here it will get it from Shared Configuration
       - make codefresh/sync/auth/cloudposse
       - make codefresh/sync/diff
+
+
