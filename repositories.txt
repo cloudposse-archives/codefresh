@@ -1,2 +1,3 @@
 cloudposse/terraform-aws-s3-bucket
 cloudposse/terraform-aws-mq-broker
+cloudposse/terraform-aws-chamber-s3-iam-role
