@@ -1,5 +1,5 @@
 cloudposse/terraform-aws-s3-bucket
 cloudposse/terraform-aws-mq-broker
-cloudposse/terraform-aws-chamber-s3-iam-role
+cloudposse/terraform-aws-iam-chamber-s3-role
 cloudposse/terraform-aws-iam-policy-document-aggregator
 cloudposse/terraform-aws-iam-role
