@@ -1,0 +1,37 @@
+version: '1.0'
+kind: pipeline
+metadata:
+  name: {{ .Env.PROJECT }}/deploy
+  deprecate: {}
+  labels:
+    tags: []
+spec:
+  triggers:
+    - name: deploy
+      type: git
+      repo: {{ .Env.REPO }}
+      events:
+        - pullrequest.commentAdded
+      pullRequestAllowForkEvents: false
+      commentRegex: /.*/gi
+      branchRegex: /.*/gi
+      branchRegexInput: regex
+      provider: github
+      disabled: true
+      options:
+        noCache: false
+        noCfCache: false
+        resetVolume: false
+      verified: true
+      context: github
+      contexts: []
+      variables: []
+  variables: []
+  contexts:
+    - ECR
+    - Datadog
+    - GitHub
+    - Slack
+  terminationPolicy: []
+  externalResources: []
+{{ (include "pipeline" | strings.ReplaceAll `version: '1.0'` "") | indent 2 }}

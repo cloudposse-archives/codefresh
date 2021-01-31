@@ -1,0 +1,37 @@
+version: '1.0'
+kind: pipeline
+metadata:
+  name: {{ .Env.PROJECT }}/destroy
+  deprecate: {}
+  labels:
+    tags: []
+spec:
+  triggers:
+    - name: destroy
+      type: git
+      repo: {{ .Env.REPO }}
+      events:
+        - pullrequest.closed
+        - pullrequest.merged
+        - pullrequest.unmerged-closed
+        - pullrequest.unlabeled
+      pullRequestAllowForkEvents: false
+      commentRegex: /.*/gi
+      branchRegex: /.*/gi
+      branchRegexInput: regex
+      provider: github
+      disabled: false
+      options:
+        noCache: false
+        noCfCache: false
+        resetVolume: false
+      verified: true
+      context: github
+      contexts: []
+      variables: []
+  variables: []
+  contexts:
+    - GitHub
+  terminationPolicy: []
+  externalResources: []
+{{ (include "pipeline" | strings.ReplaceAll `version: '1.0'` "") | indent 2 }}

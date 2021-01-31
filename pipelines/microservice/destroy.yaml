@@ -1,0 +1,123 @@
+version: '1.0'
+
+stages:
+  - Prepare
+  - Build
+  - Destroy
+
+steps:
+
+  main_clone:
+    # https://codefresh.io/docs/docs/codefresh-yaml/steps/git-clone/
+    title: "Clone repository"
+    type: git-clone
+    stage: Prepare
+    description: "Clone repository"
+    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    git: github
+    revision: ${{CF_REVISION}}
+
+  set_stage:
+    title: "Set stage"
+    stage: Prepare
+    image: alpine
+    commands:
+      - cf_export STAGE=preview
+
+  set_codefresh_variables:
+    title: "Set Codefresh variables"
+    stage: Build
+    image: alpine
+    commands:
+      - "[ ! -f ./codefresh/defaults.env ] ||  cat ./codefresh/defaults.env | tee -a ${{CF_VOLUME_PATH}}/env_vars_to_export"
+      - "[ ! -f ./codefresh/${{STAGE}}.env ] || cat ./codefresh/${{STAGE}}.env | tee -a ${{CF_VOLUME_PATH}}/env_vars_to_export"
+
+  export:
+    title: "Export environment"
+    stage: Prepare
+    image: alpine
+    commands:
+      - cf_export NAMESPACE=pr-${{CF_PULL_REQUEST_NUMBER}}-${{CF_REPO_NAME}}
+      - cf_export CF_BUILD_DATE_TIME=$(date +"%Y-%m-%d/%H:%M:%S" -d @$((${{CF_BUILD_TIMESTAMP}}/1000)))
+
+  show_context:
+    title: "Show context"
+    stage: Prepare
+    image: alpine
+    commands:
+      - |-
+        echo "Repo owner: $CF_REPO_OWNER"
+        echo "Repo name: $CF_REPO_NAME"
+        echo "Branch: $CF_BRANCH"
+        echo "Release tag: $CF_RELEASE_TAG"
+        echo "Commit URL: $CF_COMMIT_URL"
+        echo "Commit message: $CF_COMMIT_MESSAGE"
+        echo "Commit author: $CF_COMMIT_AUTHOR"
+        echo "Revision: $CF_REVISION"
+        echo "Short revision: $CF_SHORT_REVISION"
+        echo "Pull Request action: $CF_PULL_REQUEST_ACTION"
+        echo "Stage: $STAGE"
+        echo "Namespace: $NAMESPACE"
+
+  build_image:
+    title: "Build Docker image"
+    stage: Build
+    type: build
+    description: "Build Docker image"
+    image_name: ${{CF_REPO_NAME}}
+    tag: ${{CF_SHORT_REVISION}}
+    dockerfile: Dockerfile
+    no_cache: false
+    no_cf_cache: false
+
+  wait:
+    title: "Wait"
+    stage: Destroy
+    image: codefresh/cli:latest
+    commands:
+      - codefresh get builds --pipeline=destroy --pipeline=preview --branch=${{CF_BRANCH}} --status running --limit 1000 -o json | jq --arg id ${{CF_BUILD_ID}} -ser 'flatten|.[-1].id==$id'
+    retry:
+      maxAttempts: 10
+      delay: 20
+      exponentialFactor: 1.1
+    when:
+      condition:
+        any:
+          deployLabel: "match('${{CF_PULL_REQUEST_LABELS}}', 'deploy', false) == false"
+          validatePRAction: "'${{CF_PULL_REQUEST_ACTION}}' == 'closed'"
+
+  destroy:
+    title: "Destroy Preview Environment"
+    stage: Destroy
+    image: ${{build_image}}
+    working_directory: /deploy/
+    commands:
+      - echo 'Destroying ${{CF_REPO_NAME}} and namespace ${{NAMESPACE}}'
+      - apk add kubectl@cloudposse
+      - kubectl config use-context ${{KUBE_CONTEXT}}
+      - kubectl delete namespace ${{NAMESPACE}} --ignore-not-found --cascade=true
+    when:
+      condition:
+        any:
+          deployLabel: "match('${{CF_PULL_REQUEST_LABELS}}', 'deploy', false) == false"
+          validatePRAction: "'${{CF_PULL_REQUEST_ACTION}}' == 'closed'"
+
+  set_github_destroy_status_to_success:
+    title: Set GitHub destroy status to "success"
+    stage: Destroy
+    image: cloudposse/github-status-updater
+    environment:
+      - GITHUB_ACTION=update_state
+      - GITHUB_TOKEN=${{GITHUB_TOKEN}}
+      - GITHUB_OWNER=${{CF_REPO_OWNER}}
+      - GITHUB_REPO=${{CF_REPO_NAME}}
+      - GITHUB_REF=${{CF_REVISION}}
+      - GITHUB_CONTEXT=preview/env
+      - GITHUB_STATE=success
+      - GITHUB_DESCRIPTION=Destroyed by @${{CF_BUILD_INITIATOR}}
+      - GITHUB_TARGET_URL=${{CF_BUILD_URL}}
+    when:
+      condition:
+        any:
+          deployLabel: "match('${{CF_PULL_REQUEST_LABELS}}', 'deploy', false) == false && '${{GITHUB_NOTIFICATIONS_ENABLED}}' == 'true'"
+          validatePRAction: "'${{CF_PULL_REQUEST_ACTION}}' == 'closed' && '${{GITHUB_NOTIFICATIONS_ENABLED}}' == 'true'"

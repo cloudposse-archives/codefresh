@@ -1,0 +1,36 @@
+version: '1.0'
+kind: pipeline
+metadata:
+  name: {{ .Env.PROJECT }}/release
+  deprecate: {}
+  labels:
+    tags: []
+spec:
+  triggers:
+    - name: release
+      type: git
+      repo: {{ .Env.REPO }}
+      events:
+        - release
+      pullRequestAllowForkEvents: false
+      commentRegex: /.*/gi
+      branchRegex: /.*/gi
+      branchRegexInput: regex
+      provider: github
+      disabled: false
+      options:
+        noCache: false
+        noCfCache: false
+        resetVolume: false
+      verified: true
+      context: github
+      contexts: []
+      variables: []
+  variables: []
+  contexts:
+    - ECR
+  terminationPolicy: []
+  externalResources: []
+  options:
+    keepPVCsForPendingApproval: true
+{{ (include "pipeline" | strings.ReplaceAll `version: '1.0'` "") | indent 2 }}

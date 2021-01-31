@@ -1,0 +1,108 @@
+version: '1.0'
+
+stages:
+  - Prepare
+  - Promote
+  - UAT
+  - Staging
+  - Production
+
+steps:
+  export:
+    title: "Export environment"
+    stage: Prepare
+    image: alpine
+    commands:
+      # ECR_BASE_NAME is set as a shared environment variable in Codefresh
+      - cf_export IMAGE_NAME=${{ECR_BASE_NAME}}/${{CF_REPO_NAME}}
+
+  show_context:
+    title: "Show context"
+    stage: Prepare
+    image: alpine
+    commands:
+      - |-
+        echo "Repo owner: $CF_REPO_OWNER"
+        echo "Repo name: $CF_REPO_NAME"
+        echo "Branch: $CF_BRANCH"
+        echo "Release tag: $CF_RELEASE_TAG"
+        echo "Commit URL: $CF_COMMIT_URL"
+        echo "Commit message: $CF_COMMIT_MESSAGE"
+        echo "Commit author: $CF_COMMIT_AUTHOR"
+        echo "Revision: $CF_REVISION"
+        echo "Short revision: $CF_SHORT_REVISION"
+
+  announce:
+    title: "Announce release deployment"
+    stage: Promote
+    image: alpine
+    commands:
+      - echo "Preparing deployment of ${{CF_RELEASE_TAG}} release at revision ${{CF_REVISION}}"
+
+  pull_image_sha:
+    title: "Pull image with commit SHA"
+    stage: Promote
+    image: "${{IMAGE_NAME}}:${{CF_REVISION}}"
+    registry: ecr
+    retry:
+      maxAttempts: 10
+      delay: 20
+      exponentialFactor: 1.1
+    commands:
+      - "true"
+
+  push_image_tag:
+    title: "Push image with release tag"
+    stage: Promote
+    type: push
+    registry: ecr
+    candidate: "${{IMAGE_NAME}}:${{CF_REVISION}}"
+    tags:
+      - "${{CF_RELEASE_TAG}}"
+
+  deploy_uat:
+    title: "Releasing to uat"
+    stage: UAT
+    image: 'codefresh/cli:latest'
+    environment:
+      - STAGE=uat
+    commands:
+      - codefresh run ${{CF_REPO_NAME}}/deploy -b=${{CF_BRANCH}} -v CF_BRANCH=${{CF_BRANCH}} -v CF_REPO_OWNER=${{CF_REPO_OWNER}} -v CF_REPO_NAME=${{CF_REPO_NAME}} -v CF_REVISION=${{CF_REVISION}} -v CF_RELEASE_TAG=${{CF_RELEASE_TAG}} -v CF_PRERELEASE_FLAG=${{CF_PRERELEASE_FLAG}} -v CF_SHORT_REVISION=${{CF_SHORT_REVISION}} -v CF_COMMIT_URL=${{CF_COMMIT_URL}} -v "CF_COMMIT_MESSAGE=${{CF_COMMIT_MESSAGE}}" -v CF_COMMIT_AUTHOR=${{CF_COMMIT_AUTHOR}} -v CF_BRANCH_TAG_NORMALIZED=${{CF_BRANCH_TAG_NORMALIZED}} -v CF_BUILD_ID=${{CF_BUILD_ID}} -v STAGE=${STAGE}
+
+  deploy_staging_confirmation:
+    type: pending-approval
+    title: "Deploy Release to staging?"
+    stage: Staging
+
+  deploy_staging:
+    title: "Releasing to staging"
+    stage: Staging
+    image: 'codefresh/cli:latest'
+    environment:
+      - STAGE=staging
+    commands:
+      - codefresh run ${{CF_REPO_NAME}}/deploy -b=${{CF_BRANCH}} -v CF_BRANCH=${{CF_BRANCH}} -v CF_REPO_OWNER=${{CF_REPO_OWNER}} -v CF_REPO_NAME=${{CF_REPO_NAME}} -v CF_REVISION=${{CF_REVISION}} -v CF_RELEASE_TAG=${{CF_RELEASE_TAG}} -v CF_PRERELEASE_FLAG=${{CF_PRERELEASE_FLAG}} -v CF_SHORT_REVISION=${{CF_SHORT_REVISION}} -v CF_COMMIT_URL=${{CF_COMMIT_URL}} -v "CF_COMMIT_MESSAGE=${{CF_COMMIT_MESSAGE}}" -v CF_COMMIT_AUTHOR=${{CF_COMMIT_AUTHOR}} -v CF_BRANCH_TAG_NORMALIZED=${{CF_BRANCH_TAG_NORMALIZED}} -v CF_BUILD_ID=${{CF_BUILD_ID}} -v STAGE=${STAGE}
+    when:
+      steps:
+        - name: deploy_staging_confirmation
+          on:
+            - approved
+
+  deploy_prod_confirmation:
+    type: pending-approval
+    title: "Deploy Release to prod?"
+    stage: Production
+
+  deploy_prod:
+    title: "Releasing to prod"
+    stage: Production
+    image: 'codefresh/cli:latest'
+    environment:
+      - STAGE=prod
+    commands:
+      - codefresh run ${{CF_REPO_NAME}}/deploy -b=${{CF_BRANCH}} -v CF_BRANCH=${{CF_BRANCH}} -v CF_REPO_OWNER=${{CF_REPO_OWNER}} -v CF_REPO_NAME=${{CF_REPO_NAME}} -v CF_REVISION=${{CF_REVISION}} -v CF_RELEASE_TAG=${{CF_RELEASE_TAG}} -v CF_PRERELEASE_FLAG=${{CF_PRERELEASE_FLAG}} -v CF_SHORT_REVISION=${{CF_SHORT_REVISION}} -v CF_COMMIT_URL=${{CF_COMMIT_URL}} -v "CF_COMMIT_MESSAGE=${{CF_COMMIT_MESSAGE}}" -v CF_COMMIT_AUTHOR=${{CF_COMMIT_AUTHOR}} -v CF_BRANCH_TAG_NORMALIZED=${{CF_BRANCH_TAG_NORMALIZED}} -v CF_BUILD_ID=${{CF_BUILD_ID}} -v STAGE=${STAGE}
+    when:
+      steps:
+        - name: deploy_prod_confirmation
+          on:
+            - approved

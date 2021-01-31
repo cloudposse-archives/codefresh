@@ -1,13 +1,15 @@
+# Things that could be checked into Git but need not be in the Docker image
+.git
+.editorconfig
+
+# Below here should be pretty much a copy of .gitignore
 .build-harness
 build-harness/
 aws-assumed-role/
 .idea/
 *.iml
 
-vendir.lock.yml
-
 # Compiled and auto-generated files
-# Note that the leading "**/" appears necessary for Docker even if not for Git
 **/nohup.out
 **/*.tfstate
 **/*.tfstate.*
@@ -22,7 +24,6 @@ vendir.lock.yml
 **/crash.log
 
 # Module directory
-# Note that the leading "**/" appears necessary for Docker even if not for Git
 **/.terraform/
 **/.module/
 **/.helmfile/
