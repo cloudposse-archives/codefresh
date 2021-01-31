@@ -1,5 +1,14 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
 # Name of this project
-name: Codefresh pipelines
+name: codefresh
+
+# Logo for this project
+#logo: docs/logo.png
 
 # License of this project
 license: "APACHE2"
@@ -8,39 +17,78 @@ license: "APACHE2"
 copyrights:
   - name: "Cloud Posse, LLC"
     url: "https://cloudposse.com"
-    year: "2019"
+    year: "2021"
 
-# Canonical GitHub repo 
-github_repo: cloudposse/codefresh-pipelines
+# Canonical GitHub repo
+github_repo: cloudposse/codefresh
 
 # Badges to display
 badges:
-  - name: "Build Status"
-    image: "https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fcodefresh%2Fcodefresh?type=cf-1"
-    url: "https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/codefresh/codefresh"
   - name: "Latest Release"
     image: "https://img.shields.io/github/release/cloudposse/codefresh.svg"
-    url: "https://github.com/cloudposse/codefresh/releases"
+    url: "https://github.com/cloudposse/codefresh/releases/latest"
   - name: "Slack Community"
     image: "https://slack.cloudposse.com/badge.svg"
     url: "https://slack.cloudposse.com"
 
+categories:
+  - codefresh-pipelines
+  - codefresh
+  - pipelines
+  - pipeline
+  - cicd
+  - ci-cd
+  - ci-cd-pipeline
+  - cicd-pipeline
+  - gitops
+  - catalog
+  - steps
+  - spec
+  - specifications
+  - specification
+  - build
+  - deploy
+  - release
+  - destroy
+
+# List any related terraform modules that this module may be used with or that this module depends on.
 related:
   - name: "build-harness"
     description: "Collection of Makefiles to facilitate building Golang projects, Dockerfiles, Helm charts, and more"
     url: "https://github.com/cloudposse/build-harness"
-  - name: "Packages"
+  - name: "packages"
     description: "Cloud Posse installer and distribution of native apps"
     url: "https://github.com/cloudposse/packages"
 
 # Short description of this project
 description: |-
-  This `codefresh` repo allows to create and update `Codefresh` pipelines for a collection of terraform modules and other repos.
+  Catalog of reusable Codefresh pipelines, pipeline specs, and pipeline shared steps.
 
-# How to use this project
-usage: |-
-  If you need to add new repo, just update `Makefile` adding new repo to `REPOSITORIES` variable. Open a PR and as soon as it's closed, a new `Codefresh` repository will be created with proper pipeline.
-  If you need to update pipelines, feel free to update the files in `templates` folder, open a PR and as soon as it's closed all supported pipelines will be updated.
+# Introduction to the project
+introduction: |-
+
+  This repository contains catalogs of reusable Codefresh [pipelines]((pipelines/README.md)), [pipeline specs]((specs/README.md)), and [pipeline shared steps]((steps/README.md)).
+
+
+  ## References
+
+  - https://codefresh.io/docs/docs/configure-ci-cd-pipeline/introduction-to-codefresh-pipelines/
+  - https://codefresh.io/devops-tutorial/programmatic-creation-codefresh-pipelines-part1/
+  - https://codefresh.io/devops-tutorial/programmatic-creation-codefresh-pipelines-part2/
+  - https://codefresh.io/docs/docs/codefresh-yaml/steps/#creating-a-typed-codefresh-plugin
+  - https://codefresh-io.github.io/cli/
+  - https://codefresh.io/codefresh-news/introducing-codefresh-cli
+  - https://codefresh.io/docs/docs/integrations/codefresh-api/#example---creating-codefresh-pipelines-externally
+  - https://codefresh-io.github.io/cli/pipelines/spec/
+  - https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#contexts
+  - https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
+  - https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+  - https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads
+  - https://docs.github.com/en/rest/reference/repos
+
+# How to get started quickly
+#quickstart: |-
+#  Here's how to get started...
 
 # Contributors to this project
 contributors:
@@ -50,3 +98,5 @@ contributors:
     github: "goruha"
   - name: "Maxim Mironenko"
     github: "maximmi"
+  - name: "Andriy Knysh"
+    github: "aknysh"

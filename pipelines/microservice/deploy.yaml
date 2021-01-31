@@ -1,0 +1,185 @@
+version: '1.0'
+
+stages:
+  - Prepare
+  - Deploy
+
+steps:
+
+  main_clone:
+    # https://codefresh.io/docs/docs/codefresh-yaml/steps/git-clone/
+    title: "Clone repository"
+    type: git-clone
+    stage: Prepare
+    description: "Clone repository"
+    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    git: github
+    revision: ${{CF_REVISION}}
+
+  set_codefresh_variables:
+    title: "Set Codefresh variables"
+    stage: Prepare
+    image: alpine
+    commands:
+      - "[ ! -f ./codefresh/defaults.env ] ||  cat ./codefresh/defaults.env | tee -a ${{CF_VOLUME_PATH}}/env_vars_to_export"
+      - "[ ! -f ./codefresh/${{STAGE}}.env ] || cat ./codefresh/${{STAGE}}.env | tee -a ${{CF_VOLUME_PATH}}/env_vars_to_export"
+
+  export:
+    title: "Export environment"
+    stage: Prepare
+    image: alpine
+    commands:
+      - cf_export NAMESPACE=${{STAGE}}
+      - cf_export APP_NAME=${{CF_REPO_NAME}}
+      - cf_export APP_SCHEME=https
+      - cf_export CF_BUILD_DATE_TIME=$(date +"%Y-%m-%d/%H:%M:%S" -d @$((${{CF_BUILD_TIMESTAMP}}/1000)))
+      - cf_export APP_HOST=${{STAGE}}-${{CF_REPO_NAME}}.${{BASE_HOST}}
+
+      # Docker image name and tag for Kubernetes to pull the image from (used as ENV vars in the helmfile)
+      # ECR_BASE_NAME is set as a shared environment variable in Codefresh
+      - cf_export IMAGE_NAME=${{ECR_BASE_NAME}}/${{CF_REPO_NAME}}
+      - cf_export IMAGE_TAG=${{CF_REVISION}}
+
+  show_context:
+    title: "Show context"
+    stage: Prepare
+    image: alpine
+    commands:
+      - |-
+        echo "Repo owner: $CF_REPO_OWNER"
+        echo "Repo name: $CF_REPO_NAME"
+        echo "Branch: $CF_BRANCH"
+        echo "Release tag: $CF_RELEASE_TAG"
+        echo "Commit URL: $CF_COMMIT_URL"
+        echo "Commit message: $CF_COMMIT_MESSAGE"
+        echo "Commit author: $CF_COMMIT_AUTHOR"
+        echo "Revision: $CF_REVISION"
+        echo "Short revision: $CF_SHORT_REVISION"
+        echo "Stage: $STAGE"
+        echo "Namespace: $NAMESPACE"
+        echo "App host: $APP_HOST"
+
+  deploy_helmfile:
+    title: "Deploy with helmfile"
+    stage: Deploy
+    image: "${{IMAGE_NAME}}:${{IMAGE_TAG}}"
+    working_directory: /deploy/
+    commands:
+      - echo 'Deploying ${{IMAGE_NAME}}:${{IMAGE_TAG}} to namespace ${{NAMESPACE}}'
+      - apk add --update curl make bash git kubectl@cloudposse helm@cloudposse helmfile@cloudposse
+      - kubectl config use-context ${{KUBE_CONTEXT}}
+      # Deploy to the cluster in the namespace
+      - helmfile --namespace ${{NAMESPACE}} sync
+
+  set_github_deployment_status_to_success:
+    title: Set GitHub deployment status to "success"
+    stage: Deploy
+    image: cloudposse/github-status-updater
+    environment:
+      - GITHUB_ACTION=update_state
+      - GITHUB_TOKEN=${{GITHUB_TOKEN}}
+      - GITHUB_OWNER=${{CF_REPO_OWNER}}
+      - GITHUB_REPO=${{CF_REPO_NAME}}
+      - GITHUB_REF=${{CF_REVISION}}
+      - GITHUB_CONTEXT=${{STAGE}}/env
+      - GITHUB_STATE=success
+      - GITHUB_DESCRIPTION=Deployed to ${{NAMESPACE}} by @${{CF_BUILD_INITIATOR}}
+      - GITHUB_TARGET_URL=${{APP_SCHEME}}://${{APP_HOST}}
+    when:
+      condition:
+        all:
+          githubNotificationsEnabled: "'${{GITHUB_NOTIFICATIONS_ENABLED}}' == 'true'"
+
+  send_slack_notification:
+    title: "Send notification to Slack channel"
+    stage: Deploy
+    image: cloudposse/build-harness
+    working_directory: /build-harness
+    environment:
+      - SLACK_WEBHOOK_URL=${{SLACK_WEBHOOK_URL}}
+      - APP_HOST="${{APP_SCHEME}}://${{APP_HOST}}"
+      - PIPELINE_ENV=${{STAGE}}
+      - PIPELINE_ACTION=deploy
+      - CHART_NAME=${{CF_REPO_NAME}}
+      - CF_BUILD_URL=${{CF_BUILD_URL}}
+      - CF_REPO_OWNER=${{CF_REPO_OWNER}}
+      - CF_REPO_NAME=${{CF_REPO_NAME}}
+      - CF_BUILD_TIMESTAMP=${{CF_BUILD_TIMESTAMP}}
+      - CF_BUILD_TRIGGER=${{CF_BUILD_TRIGGER}}
+      - GIT_COMMIT_SHORT=${{CF_SHORT_REVISION}}
+      - GIT_COMMIT_URL=${{CF_COMMIT_URL}}
+      - GIT_COMMIT_MESSAGE=${{CF_COMMIT_MESSAGE}}
+      - GIT_COMMIT_AUTHOR=${{CF_COMMIT_AUTHOR}}
+      - GIT_BRANCH_TAG=${{CF_BRANCH_TAG_NORMALIZED}}
+    commands:
+      - make codefresh/notify/slack/deploy/webapp GIT_COMMIT_TIMESTAMP=$((${{CF_BUILD_TIMESTAMP}}/1000))
+    when:
+      condition:
+        all:
+          slackNotificationsEnabled: "'${{SLACK_NOTIFICATIONS_ENABLED}}' == 'true'"
+
+  add_url_to_comment_on_commit:
+    title: "Comment on commit with the deployed URL"
+    stage: Deploy
+    image: cloudposse/github-commenter
+    environment:
+      - GITHUB_TOKEN=${{GITHUB_TOKEN}}
+      - GITHUB_OWNER=${{CF_REPO_OWNER}}
+      - GITHUB_REPO=${{CF_REPO_NAME}}
+      - GITHUB_COMMENT_TYPE=commit
+      - GITHUB_COMMIT_SHA=${{CF_SHORT_REVISION}}
+      - 'GITHUB_COMMENT=Version ${{CF_SHORT_REVISION}} deployed by @${{CF_BUILD_INITIATOR}} to the [`${{NAMESPACE}}`](${{APP_SCHEME}}://${{APP_HOST}}) namespace on `${{STAGE}}` at ${{CF_BUILD_DATE_TIME}}<details>![:thumbsup:](https://cloudposse.com/urand/familyguy.gif)</details>'
+    when:
+      condition:
+        all:
+          githubNotificationsEnabled: "'${{GITHUB_NOTIFICATIONS_ENABLED}}' == 'true'"
+
+  # https://docs.datadoghq.com/api/v1/events/
+  # https://docs.datadoghq.com/tracing/deployment_tracking/
+  # https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=kubernetes
+  send_datadog_notification:
+    title: "Send notification to Datadog"
+    stage: Deploy
+    image: alpine
+    environment:
+      - CF_REPO_NAME=${{CF_REPO_NAME}}
+      - CF_BRANCH=${{CF_BRANCH}}
+      - CF_RELEASE_TAG=${{CF_RELEASE_TAG}}
+      - CF_REVISION=${{CF_REVISION}}
+      - CF_SHORT_REVISION=${{CF_SHORT_REVISION}}
+      - CF_BUILD_INITIATOR=${{CF_BUILD_INITIATOR}}
+      - CF_BUILD_DATE_TIME=${{CF_BUILD_DATE_TIME}}
+      - DATADOG_API_KEY=${{DATADOG_API_KEY}}
+      - IMAGE_NAME=${{IMAGE_NAME}}
+      - IMAGE_TAG=${{IMAGE_TAG}}
+      - STAGE=${{STAGE}}
+      - APP_SCHEME=${{APP_SCHEME}}
+      - APP_HOST=${{APP_HOST}}
+    commands:
+      - |-
+        set -e
+        apk add --update curl bash
+        api="https://app.datadoghq.com/api/v1/events?api_key=${DATADOG_API_KEY}"
+        payload=$(cat <<-EOJ
+        {
+        "title": "Deployed $IMAGE_NAME:$IMAGE_TAG to $STAGE",
+        "text": "Version $CF_SHORT_REVISION deployed to $STAGE at $CF_BUILD_DATE_TIME: $APP_SCHEME://$APP_HOST",
+        "alert_type": "info",
+        "device_name": "Codefresh",
+        "tags": [
+        "env:$STAGE",
+        "service:$CF_REPO_NAME",
+        "version:$CF_REVISION",
+        "stage:$STAGE",
+        "branch:$CF_BRANCH",
+        "release:$CF_RELEASE_TAG"
+        ]
+        }
+        EOJ
+        )
+        echo -e "$payload"
+        curl -v -s -X POST -H "Content-type: application/json" -d "$payload" "$api"
+    when:
+      condition:
+        all:
+          githubNotificationsEnabled: "'${{DATADOG_NOTIFICATIONS_ENABLED}}' == 'true'"

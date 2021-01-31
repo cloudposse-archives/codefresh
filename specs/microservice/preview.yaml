@@ -1,0 +1,39 @@
+version: '1.0'
+kind: pipeline
+metadata:
+  name: {{ .Env.PROJECT }}/preview
+  deprecate: {}
+  labels:
+    tags: []
+spec:
+  triggers:
+    - name: preview
+      type: git
+      repo: {{ .Env.REPO }}
+      events:
+        - pullrequest.opened
+        - pullrequest.reopened
+        - pullrequest.labeled
+        - pullrequest.synchronize
+      pullRequestAllowForkEvents: false
+      commentRegex: /.*/gi
+      branchRegex: /.*/gi
+      branchRegexInput: regex
+      provider: github
+      disabled: false
+      options:
+        noCache: false
+        noCfCache: false
+        resetVolume: false
+      verified: true
+      context: github
+      contexts: []
+      variables: []
+  variables: []
+  contexts:
+    - ECR
+    - GitHub
+    - Slack
+  terminationPolicy: []
+  externalResources: []
+{{ (include "pipeline" | strings.ReplaceAll `version: '1.0'` "") | indent 2 }}

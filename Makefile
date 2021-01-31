@@ -1,16 +1,34 @@
-export DEFAULT_HELP_TARGET ?= help
-export HELP_FILTER ?= help|init|codefresh/sync
-export BUILD_HARNESS_BRANCH ?= 0.15.3
+export DOCKER_ORG ?= cloudposse
+export DOCKER_IMAGE ?= $(DOCKER_ORG)/codefresh
+export DOCKER_TAG ?= latest
+export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
+export APP_NAME = codefresh
+GEODESIC_INSTALL_PATH ?= /usr/local/bin
+export INSTALL_PATH ?= $(GEODESIC_INSTALL_PATH)
+export SCRIPT = $(INSTALL_PATH)/$(APP_NAME)
+
 -include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
 
-## Project name
-PROJECT ?= cloudposse-pipelines
+## Initialize build-harness, install deps, build docker container, install wrapper script and run shell
+all: init deps build install run
+	@exit 0
 
-## Repos to sync pipelines
-REPOSITORIES ?= $(shell cat repositories.txt)
+## Install dependencies (if any)
+deps:
+	@exit 0
 
-## Codefresh accounts to operate with
-ACCOUNTS ?= cloudposse
+## Build docker image
+build:
+	@make --no-print-directory docker/build
 
-## Pipelines for `cloudposse`
-CLOUDPOSSE_PIPELINES ?= lint
+## Push docker image to registry
+push:
+	docker push $(DOCKER_IMAGE)
+
+## Install wrapper script from geodesic container
+install:
+	@docker run --rm $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
+
+## Start the geodesic shell by calling wrapper script
+run:
+	$(SCRIPT)
